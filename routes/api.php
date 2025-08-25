@@ -31,4 +31,12 @@ Route::middleware(['auth:api'])->group(function () {
 
     // service
     Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
+
+    Route::get('partners/{id}/availability', [\App\Http\Controllers\Api\BookingController::class, 'availability']);
+    Route::post('bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
+    Route::get('bookings/{id}', [\App\Http\Controllers\Api\BookingController::class, 'show']);
+    Route::post('bookings/{id}/confirm', [\App\Http\Controllers\Api\BookingController::class, 'confirm']);
+    Route::post('bookings/{id}/check-in', [\App\Http\Controllers\Api\BookingController::class, 'checkIn']);
+    Route::post('bookings/{id}/complete', [\App\Http\Controllers\Api\BookingController::class, 'complete']);
+    Route::post('bookings/{id}/cancel', [\App\Http\Controllers\Api\BookingController::class, 'cancel']);
 });
