@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -16,11 +17,10 @@ class ServiceController extends Controller
     public function index()
     {
         try {
-        $data = Service::with('partner')->get();
+            $data = Service::with('partner')->get();
             return $this->formatResponse(200, 'success', 'Services list successfully', $data);
-        }
-        catch (Exception $e) {
-            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
+        } catch (Exception $e) {
+            return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
     }
 
@@ -29,28 +29,31 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
+
         try {
             $validator = Validator::make($request->all(), [
-                'partner_id' => 'required|exists:partners,id',
+                'partner_id' => 'required',
+                'type' => 'required',
                 'name' => 'required|string|max:255',
                 'key_words' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
                 'price' => 'required|numeric|min:0',
-                'duration_minutes' => 'required|integer|min:1',
+                'discount_price' => 'numeric|min:0',
+                'sku' => 'string',
+                'duration_minutes' => 'integer|min:1',
                 'active' => 'boolean',
             ]);
             if ($validator->fails())
-                return  $this->validationError(422,'fail','Validation errors',$validator->errors());
-            $service = Service::create($validator->validated());
-            return $this->formatResponse(200,'success','Service created successfully',$service);
+                return  $this->validationError(422, 'fail', 'Validation errors', $validator->errors());
+            if ($request->type == 'service') {
+                $data = Service::create($validator->validated());
+            } else {
+                $data = Product::create($validator->validated());
+            }
+            return $this->formatResponse(200, 'success', 'Service created successfully', $data);
+        } catch (Exception $e) {
+            return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
-        catch (Exception $e) {
-            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
-        }
-
-
-
-
     }
 
     /**
@@ -62,12 +65,12 @@ class ServiceController extends Controller
             $service = Service::with('partner')->find($id);
 
             if (!$service) {
-                return $this->formatResponse(404,'fail','Service not found',null);
+                return $this->formatResponse(404, 'fail', 'Service not found', null);
             }
 
-            return $this->formatResponse(200,'success','Service show successfully',$service);
+            return $this->formatResponse(200, 'success', 'Service show successfully', $service);
         } catch (Exception $e) {
-            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
+            return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
     }
 
@@ -80,7 +83,7 @@ class ServiceController extends Controller
             $service = Service::find($id);
 
             if (!$service) {
-                return $this->formatResponse(404,'fail','Service not found',null);
+                return $this->formatResponse(404, 'fail', 'Service not found', null);
             }
 
             $validator = Validator::make($request->all(), [
@@ -94,14 +97,14 @@ class ServiceController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return  $this->validationError(422,'fail','Validation errors',$validator->errors());
+                return  $this->validationError(422, 'fail', 'Validation errors', $validator->errors());
             }
 
             $service->update($validator->validated());
 
-            return $this->formatResponse(200,'success','Service updated successfully',$service);
+            return $this->formatResponse(200, 'success', 'Service updated successfully', $service);
         } catch (Exception $e) {
-            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
+            return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
     }
 
@@ -113,13 +116,13 @@ class ServiceController extends Controller
         try {
             $service = Service::find($id);
             if (!$service) {
-                return $this->formatResponse(404,'fail','Service not found',null);
+                return $this->formatResponse(404, 'fail', 'Service not found', null);
             }
             $service->delete();
 
-            return $this->formatResponse(200,'success','Service deleted successfully',null);
+            return $this->formatResponse(200, 'success', 'Service deleted successfully', null);
         } catch (Exception $e) {
-            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
+            return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
     }
 }
