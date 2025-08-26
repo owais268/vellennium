@@ -8,6 +8,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceController extends Controller
 {
@@ -32,7 +33,6 @@ class ServiceController extends Controller
 
         try {
             $validator = Validator::make($request->all(), [
-                'partner_id' => 'required',
                 'type' => 'required',
                 'name' => 'required|string|max:255',
                 'key_words' => 'nullable|string|max:255',
@@ -42,15 +42,26 @@ class ServiceController extends Controller
                 'sku' => 'string',
                 'duration_minutes' => 'integer|min:1',
                 'active' => 'boolean',
+                'marketplace_id' => 'required',
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
             ]);
             if ($validator->fails())
                 return  $this->validationError(422, 'fail', 'Validation errors', $validator->errors());
+            $validateData = array_merge($validator->validated(), [
+                'partner_id' => Auth::id(),
+            ]);
+
             if ($request->type == 'service') {
-                $data = Service::create($validator->validated());
+                $data = Service::create($validateData);
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $data->addMedia($image)->toMediaCollection('images');
+                    }
+                }
             } else {
                 $data = Product::create($validator->validated());
             }
-            return $this->formatResponse(200, 'success', 'Service created successfully', $data);
+            return $this->formatResponse(200, 'success', 'Service created successfully', $data->load('media'));
         } catch (Exception $e) {
             return $this->validationError(500, 'fail', 'Something went wrong', $e->getMessage());
         }
