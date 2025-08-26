@@ -8,6 +8,8 @@ use App\Models\Booking;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class BookingController extends Controller
 {
@@ -63,17 +65,33 @@ class BookingController extends Controller
 
     }
     public function store(Request $request){
-        $booking = Booking::create([
-            'partner_id' => $request->partner_id,
-            'customer_id' => $request->user()->id,
-            'service_id' => $request->service_id,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'status' => 'pending',
-            'verification_code' => rand(100000,999999),
-            'price' => $request->price,
-        ]);
-        return response()->json($booking, 201);
+        try {
+            $validator = Validator::make($request->all(), [
+                'partner_id' => 'required',
+                'service_id' => 'required',
+                'start_time' => 'required',
+                'end_time' => 'required|',
+                'price' => 'required|numeric|min:0',
+            ]);
+            if ($validator->fails())
+                return  $this->validationError(422,'fail','Validation errors',$validator->errors());
+            $booking = Booking::create([
+                'partner_id' => $request->partner_id,
+                'customer_id' => $request->user()->id,
+                'service_id' => $request->service_id,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'status' => 'pending',
+                'verification_code' => rand(100000,999999),
+                'price' => $request->price,
+            ]);
+            return $this->formatResponse(200, 'success', 'Booking created successfully', $booking);
+        }
+        catch (Exception $e){
+            return $this->validationError(500,'fail','Something went wrong',$e->getMessage());
+        }
+
+
     }
     public function show($id)
     {
