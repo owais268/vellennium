@@ -28,7 +28,7 @@ Route::post('register', [\App\Http\Controllers\AuthController::class, 'register'
 
 Route::middleware(['auth:api'])->group(function () {
     Route::get('marketplace',[\App\Http\Controllers\ApiController::class,'getMarketplace']);
-
+    Route::post('services-update/{id}',[\App\Http\Controllers\Api\ServiceController::class,'update']);
     // service
     Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
 
