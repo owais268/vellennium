@@ -50,6 +50,7 @@ class AuthController extends Controller
 
     public function sellerRegistration(Request $request){
         $validator = Validator::make($request->all(), [
+            'marketplace_id'   => 'required|string',
             'business_name'   => 'required|string|max:255',
             'business_email'  => 'required|email',
             'business_phone'  => 'required|string|max:20',
