@@ -26,9 +26,11 @@ Route::get('login',function (){
 Route::post('login',[\App\Http\Controllers\AuthController::class,'login']);
 Route::post('register', [\App\Http\Controllers\AuthController::class, 'register']);
 Route::post('seller-registration',[\App\Http\Controllers\AuthController::class,'sellerRegistration']);
+Route::post('business-hour/{id}',[\App\Http\Controllers\AuthController::class,'businessHour']);
 
 Route::middleware(['auth:api'])->group(function () {
     Route::get('marketplace',[\App\Http\Controllers\ApiController::class,'getMarketplace']);
+    Route::get('product-service-by-marketplace/{id}',[\App\Http\Controllers\ApiController::class,'productServiceByMarketplace']);
     Route::post('services-update/{id}',[\App\Http\Controllers\Api\ServiceController::class,'update']);
     // service
     Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
