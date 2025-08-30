@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BusinessHours;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\Request;
@@ -83,6 +84,36 @@ class AuthController extends Controller
             $userInformation->addMediaFromRequest('documentation_licensing')->toMediaCollection('documentation');
         }
         return $this->formatResponse(200,'success','user details inserted sucessfully',$userInformation);
+
+    }
+
+    public function businessHour($user_id,Request $request){
+        $validator = Validator::make($request->all(), [
+            'hours' => 'required|array',
+            'hours.*.day' => 'required|string|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'hours.*.start_time' => 'nullable|date_format:H:i',
+            'hours.*.end_time' => 'nullable|date_format:H:i|after:hours.*.start_time',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        foreach ($request->hours as $hour) {
+            BusinessHours::updateOrCreate(
+                ['seller_id' => $user_id, 'day' => $hour['day']],
+                [
+                    'start_time' => $hour['start_time'] ?? null,
+                    'end_time' => $hour['end_time'] ?? null
+                ]
+            );
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Business hours saved successfully',
+            'data' => null
+        ]);
 
     }
 
