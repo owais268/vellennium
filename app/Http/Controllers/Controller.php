@@ -10,15 +10,13 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
     function formatResponse($code=200,$status,$message,$data=[]){
-        return[
-            "status"=>$status,
-            "code"=>$code,
-            "message"=>$message,
-            "data"=>$data,
-        ];
+        return response()->json([
+            "status"  => $status,
+            "message" => $message,
+            "errors"  => $data,
+        ], $code);
     }
     function validationError($code=200,$status,$message,$error=[]){
-
         {
             return response()->json([
                 "status"  => $status,
