@@ -18,18 +18,20 @@ class Controller extends BaseController
         ];
     }
     function validationError($code=200,$status,$message,$error=[]){
-        return[
-            "status"=>$status,
-            "code"=>$code,
-            "message"=>$message,
-            "error"=>$error,
-        ];
+
+        {
+            return response()->json([
+                "status"  => $status,
+                "message" => $message,
+                "errors"  => $error,
+            ], $code);
+        }
     }
 }
 
 
 /**
- * 
+ *
  * namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;

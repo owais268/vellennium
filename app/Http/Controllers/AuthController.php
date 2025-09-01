@@ -22,7 +22,7 @@ class AuthController extends Controller
             return  $this->validationError(422,false,'Validation errors',$validator->errors());
 
         if (!auth()->attempt($validator->validate())) {
-            return response()->json(['message' => 'Invalid credentials'], 422);
+            return  $this->formatResponse(401,'success','Invalid credentials',null);
         }
 
         $user = auth()->user();
